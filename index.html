@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tabbed Playlists</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 20px;
+            }
+            .tabs {
+                display: flex;
+                cursor: pointer;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+            .tab {
+                padding: 10px 20px;
+                background-color: #ddd;
+                margin-right: 5px;
+                border-radius: 5px 5px 0 0;
+            }
+            .tab.active {
+                background-color: #fff;
+                border-bottom: 2px solid #fff;
+            }
+            .playlist-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 20px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                display: none;
+            }
+            .playlist-container.active {
+                display: block;
+            }
+            .track {
+                padding: 10px;
+                border-bottom: 1px solid #ddd;
+            }
+            .track.music-item, .track.bell-item, .track.time-item{
+                width: 85%;
+            }
+            .track.time-item button{
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 85%;
+            }
+            .track:last-child {
+                border-bottom: none;
+            }
+            .track-title {
+                margin: 0;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .track-artist {
+                margin: 5px 0 10px;
+                font-size: 14px;
+                color: #555;
+            }
+            .track-audio {
+                width: 100%;
+            }
+            .credits {
+                margin-top: 20px;
+                font-size: 12px;
+                color: #888;
+            }        
+            .grid-container {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                grid-gap: 10px;
+            }
+            .grid-item {
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                cursor: pointer;
+            }
+            .grid-item img {
+                width: 100%;
+                height: auto;
+            }
+            .time-list {
+                display: block;
+                width: 70%;
+            }
+            /* Center the modal on the screen */
+            .custom-dialog {
+                width: 25%;
+                padding: 20px;
+                background-color: gainsboro;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border-radius: 8px;
+                z-index: 1001; /* Make sure it's above the backdrop */
+            }
+
+            /* Backdrop with opacity */
+            .backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                z-index: 1000; /* Below the dialog */
+            }
+
+            /* Image placeholder */
+            .custom-dialog .image-box {
+                width: 100%;
+                height: 50%;
+                text-align: center;
+            }
+            
+            /* Image placeholder */
+            .custom-dialog .dialog-textbox {
+                width: 100%;
+                height: 50%;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+
+            /* Countdown and stop button */
+            .custom-dialog button {
+                width: 100%;
+                margin-bottom: 10px;
+                cursor: pointer;
+            }
+
+            /* Countdown and stop button */
+            .custom-dialog .meditation-countdown {
+                width: 100%;
+                margin-bottom: 10px;
+                cursor: pointer;
+                text-align: center;
+            }
+            
+            #timer {
+                font-size: 24px;
+                font-weight: bold;
+            }
+            /* Hide dialog and backdrop by default */
+            .hidden {
+                display: none;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        
+        <link rel="stylesheet" href="https://cdn.metroui.org.ua/current/metro.css">
+        
+        <script src="https://cdn.metroui.org.ua/5.0.13/metro.js" defer></script>
+
+        <script src="https://unpkg.com/isotope-layout@3/dist/isotope.pkgd.min.js"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.7.0/timer.jquery.js" defer></script>
+        
+    </head>
+    <body>
+
+        <div class="tabs">
+            <div id="tab-music" class="tab active" data-tab="music">1- Music Playlist</div>
+            <div class="tab" data-tab="bells">2- Bell Sounds Playlist</div>
+            <div class="tab" data-tab="images">3- Reiki Self Healing Gestures</div>
+            <div class="tab" data-tab="interval">4- Interval</div>
+        </div>
+
+        <div id="music" class="track-list playlist-container active">
+            <div class="track music-item header">
+                <h2>Pixabay Music Playlist</h2>
+                <div class="credits">
+                    <p>Please select one track from given playlist by click on it.</p>
+                    <p>Click again the selected track to unselect</p>
+                </div>
+            </div>
+            <div class="track music-item 1">
+                <p class="number" hidden>1</p>
+                <p class="track-title">Deep Meditation</p>
+                <p class="track-artist">Grand_Project</p>
+                <audio class="track-audio" id="selectedOne" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/02/24/audio_1fe2d5f39b.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 2">
+                <p class="number" hidden>2</p>
+                <p class="track-title">Relaxing Meditation</p>
+                <p class="track-artist">DanaMusic</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/08/12/audio_42093329d0.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 3">
+                <p class="number" hidden>3</p>
+                <p class="track-title">Relaxing Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2021/09/06/audio_d319914b2b.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 4">
+                <p class="number" hidden>4</p>
+                <p class="track-title">Autumn Sky Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2021/08/23/audio_dfbee010eb.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 5">
+                <p class="number" hidden>5</p>
+                <p class="track-title">Meditation blue</p>
+                <p class="track-artist">Imaginedragon</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2023/02/05/audio_67531f4ea3.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 6">
+                <p class="number" hidden>6</p>
+                <p class="track-title">Meditation Music</p>
+                <p class="track-artist">Rockot</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/01/06/audio_43647fc32e.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 7">
+                <p class="number" hidden>7</p>
+                <p class="track-title">Piano Dreamcloud Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2023/12/01/audio_2a63d5f0a1.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 8">
+                <p class="number" hidden>8</p>
+                <p class="track-title">Gentle Piano Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2021/10/21/audio_8b8b6deb1f.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 9">
+                <p class="number" hidden>9</p>
+                <p class="track-title">Meditation 1(1)</p>
+                <p class="track-artist">Norrienglish</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/07/16/audio_7f016c2ce9.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 10">
+                <p class="number" hidden>10</p>
+                <p class="track-title">Meditation Relax</p>
+                <p class="track-artist">DanaMusic</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/08/12/audio_19381b07fe.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 11">
+                <p class="number" hidden>11</p>
+                <p class="track-title">Misty Mountains Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2021/10/02/audio_d524acc9c2.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 12">
+                <p class="number" hidden>12</p>
+                <p class="track-title">Relaxing Meditation Music 2</p>
+                <p class="track-artist">Ønetent</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/07/17/audio_96dfc69743.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 13">
+                <p class="number" hidden>13</p>
+                <p class="track-title">Frequency of Sleep Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2022/06/10/audio_1b76478b26.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 14">
+                <p class="number" hidden>14</p>
+                <p class="track-title">Angelic Meditation</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2023/10/19/audio_6326a3d340.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 15">
+                <p class="number" hidden>15</p>
+                <p class="track-title">Flute Meditation Music 8</p>
+                <p class="track-artist">Ønetent</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/08/08/audio_e88c617e1b.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 16">
+                <p class="number" hidden>16</p>
+                <p class="track-title">Bird Song Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2023/07/18/audio_4006bf3f63.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 17">
+                <p class="number" hidden>17</p>
+                <p class="track-title">Realxing Meditation Music 1</p>
+                <p class="track-artist">Ønetent</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/07/17/audio_a463f728c6.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 18">
+                <p class="number" hidden>18</p>
+                <p class="track-title">Blue Sky - Binaural Meditation</p>
+                <p class="track-artist">NaturesEye</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/02/16/audio_a8878f1396.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track music-item 19">
+                <p class="number" hidden>19</p>
+                <p class="track-title">Inspiring Meditation</p>
+                <p class="track-artist">saavane</p>
+                <audio class="track-audio" controls loop>
+                    <source src="https://cdn.pixabay.com/audio/2024/07/20/audio_522474e034.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+            <!-- Add more tracks as needed -->
+
+            <div class="track music-item credits">
+                <div class="credits">
+                    <p>All music provided by <a href="https://pixabay.com/music/" target="_blank">Pixabay</a>.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="bells" class="bell-list playlist-container">
+            <div class="track bell-item header">
+                <h2>Pixabay Bell Sounds Playlist</h2>
+                <div class="credits">
+                    <p>Please select one track from given playlist by click on it.</p>
+                    <p>Click again the selected track to unselect</p>
+                </div>
+            </div>
+
+            <div class="track bell-item 1">
+                <p class="number" hidden>1</p>
+                <p class="track-title">Bell Sound 1</p>
+                <p class="track-artist">Pixabay</p>
+                <audio class="track-audio" controls>
+                    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_808ee969a0.mp3?filename=bells-1-72261.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track bell-item 2">
+                <p class="number" hidden>2</p>
+                <p class="track-title">Bell Sound 2</p>
+                <p class="track-artist">Pixabay</p>
+                <audio class="track-audio" controls>
+                    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0a39aff5bd.mp3?filename=bell-meditation-75335.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track bell-item 3">
+                <p class="number" hidden>3</p>
+                <p class="track-title">Bell Sound 3</p>
+                <p class="track-artist">Pixabay</p>
+                <audio class="track-audio" controls>
+                    <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_de031c7991.mp3?filename=bells-2-31725.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track bell-item 4">
+                <p class="number" hidden>4</p>
+                <p class="track-title">Bell Sound 4</p>
+                <p class="track-artist">Pixabay</p>
+                <audio class="track-audio" controls>
+                    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6847b0477b.mp3?filename=singing-bell-hit-2-75258.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div class="track bell-item credits">
+                <div class="credits">
+                    <p>All bell sounds provided by <a href="https://pixabay.com/music/" target="_blank">Pixabay</a>.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="images" class="gestures-list playlist-container">
+            <h2>Reiki Self Healing Gestures</h2>
+
+            <div class="grid-container">
+                <div class="grid-item">
+                    <img src="Images/1.png" alt="Image 1">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/2.png" alt="Image 2">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/3.png" alt="Image 3">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/4.png" alt="Image 4">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/5.png" alt="Image 5">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/6.png" alt="Image 6">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/7.png" alt="Image 7">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/8.png" alt="Image 8">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/9.png" alt="Image 9">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/10.png" alt="Image 10">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/11.png" alt="Image 11">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/12.png" alt="Image 12">
+                </div>
+                <div class="grid-item">
+                    <img src="Images/13.png" alt="Image 13">
+                </div>
+                <div class="grid-item">
+                </div>
+                <div class="grid-item">
+                </div>
+                <div class="grid-item">
+                </div>
+            </div>
+
+
+            <div class="credits">
+                <p>All images provided by Google Images.</p>
+            </div>
+        </div>
+        
+        <div id="interval" class="interval-list playlist-container">
+            
+            <div class="track time-item header">
+                <h2>Time Interval Selection</h2>
+                <div class="credits">
+                    <p>Please select interval time for each gestures or </p>
+                    <p>select time for all meditation session</p>
+                </div>
+            </div>
+
+            <div class="track time-item">
+                <p>Total Session Time</p>
+                <input data-role="timepicker" id="timepicker" data-value="00:18:00">
+            </div>
+
+            <div class="track time-item">
+                <p>Bell Play Period</p>
+                <input data-role="timepicker" id="timepickerbell" data-value="00:03:00">
+            </div>
+
+            <div class="track time-item">
+                <button class="command-button" onclick="startMeditation()">
+                <span class="caption">
+                    Click and Start Meditation
+                </span>
+            </button>
+            </div>
+
+            <div class="credits">
+                <p>Time Picker widget is provided by <a href="https://metroui.org.ua/" target="_blank">Metro UI</a>.</p>
+            </div>
+
+        </div>
+
+        <!-- Backdrop -->
+        <div id="backdrop" class="backdrop hidden"></div>
+        <div id="customDialog" class="custom-dialog hidden">
+            <div id="dialog-gestures">
+                <div class="image-box">
+                    <img id="dialog-image" src="Images/1.png" alt="Gesture Image">
+                </div>
+                <div id="dialog-text" class="dialog-textbox">6 Gestures Left</div>
+            </div>
+            <div class="meditation-countdown">
+                <p>All Session Timer: </p>
+                <div  id="timerDiv">00:00</div>            
+            </div>
+            <div class="meditation-countdown">
+                <p>Bell Interval Timer: </p>
+                <div id="timerDivBell">Bell Interval Timer: 00:00</div>      
+            </div>
+            <button onclick="stopMeditation()">Stop</button>
+        </div>
+
+        <script src="script.js"></script>
+
+    </body>
+</html>
