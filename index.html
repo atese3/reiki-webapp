@@ -49,7 +49,7 @@
                 display: block;
                 margin-left: auto;
                 margin-right: auto;
-                width: 85%;
+                width: 100%;
             }
             .track:last-child {
                 border-bottom: none;
@@ -126,7 +126,6 @@
             /* Image placeholder */
             .custom-dialog .dialog-textbox {
                 width: 100%;
-                height: 50%;
                 margin-bottom: 10px;
                 text-align: center;
             }
@@ -146,8 +145,19 @@
                 text-align: center;
             }
             
-            #timer {
-                font-size: 24px;
+            @media only screen and (max-width: 768px) {
+                /* For mobile phones: */
+                [class*="custom-dialog"] {
+                    width: 100%;
+                }
+                [class*="caption"] {
+                    font-size: 15px;
+                    font-weight: bold;
+                }
+            }
+            
+            #timerDiv, #timerDivBell, #dialog-text {
+                font-size: 18px;
                 font-weight: bold;
             }
             /* Hide dialog and backdrop by default */
@@ -428,6 +438,16 @@
                     Your browser does not support the audio element.
                 </audio>
             </div>
+            
+            <div class="track bell-item 5" hidden>
+                <p class="number" hidden>5</p>
+                <p class="track-title">Bell Sound 5</p>
+                <p class="track-artist">Pixabay</p>
+                <audio class="track-audio" id="bellFinal" controls>
+                    <source src="https://cdn.pixabay.com/audio/2022/03/24/audio_df603ebac5.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
 
             <div class="track bell-item credits">
                 <div class="credits">
@@ -532,7 +552,7 @@
         <div id="backdrop" class="backdrop hidden"></div>
         <div id="customDialog" class="custom-dialog hidden">
             <div id="dialog-gestures">
-                <div class="image-box">
+                <div class="image-box" >
                     <img id="dialog-image" src="Images/1.png" alt="Gesture Image">
                 </div>
                 <div id="dialog-text" class="dialog-textbox">6 Gestures Left</div>

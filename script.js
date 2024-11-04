@@ -130,9 +130,12 @@ function startMeditation()
         $('#dialog-text')[0].innerHTML = selectedGestures.length.toString() + " Gestures Left";
     }
     
-    //starts playing
-    selectedTrack.currentTime = 0; // if it is played while selecting start again
-    selectedTrack.play();
+    if  (selectedTrack != '')
+    {
+        //starts playing
+        selectedTrack.currentTime = 0; // if it is played while selecting start again
+        selectedTrack.play();
+    }
 
     $('#timerDiv').timer({
         countdown: true,
@@ -179,15 +182,20 @@ function startMeditation()
 }
 
 function stopMeditation() {
-    selectedTrack.pause();
-    selectedTrack.currentTime = 0;
+    $('#bellFinal')[0].currentTime = 0;
+    $('#bellFinal')[0].play();
+    if (selectedTrack != '')
+    {
+        selectedTrack.pause();
+        selectedTrack.currentTime = 0;
+        selectedTrack.click();
+        $gridTrack.isotope({ filter: '*'});
+        selectedTrack = '';
+    }
     selectedBell.pause();
     selectedBell.currentTime = 0;
-    selectedTrack.click();
     selectedBell.click();
-    $gridTrack.isotope({ filter: '*'});
     $gridBell.isotope({ filter: '*'});
-    selectedTrack = '';
     selectedBell = '';
     selectedGestures = new Array();
     var itemList = document.getElementsByClassName('grid-item');
